@@ -1,0 +1,74 @@
+import streamlit as st
+import pandas as pd
+
+# Function to save data to session state
+def save_data(data):
+    st.session_state.data = data
+
+# Function to load data from session state
+def load_data():
+    return st.session_state.data if 'data' in st.session_state else None
+
+# Function to display the input form on the first page
+def input_form():
+    st.title("Input Form")
+    
+    # File upload
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+    
+    # Input fields
+    field1 = st.text_input("Field 1")
+    field2 = st.text_input("Field 2")
+    field3 = st.text_input("Field 3")
+    field4 = st.text_input("Field 4")
+    field5 = st.text_input("Field 5")
+    
+    # Submit button
+    if st.button("Submit"):
+        if uploaded_file is not None:
+            # Read the uploaded CSV file
+            data = pd.read_csv(uploaded_file)
+            
+            # Append the input values to the data
+            new_data = pd.DataFrame({
+                'Field 1': [field1],
+                'Field 2': [field2],
+                'Field 3': [field3],
+                'Field 4': [field4],
+                'Field 5': [field5]
+            })
+            data = pd.concat([data, new_data], ignore_index=True)
+            
+            # Save the data to session state
+            save_data(data)
+            
+            st.success("Data submitted successfully!")
+        else:
+            st.warning("Please upload a CSV file.")
+
+# Function to display the table on the second page
+def display_table():
+    st.title("Submitted Data")
+    
+    # Load the data from session state
+    data = load_data()
+    
+    if data is not None:
+        st.table(data)
+    else:
+        st.warning("No data available.")
+
+# Main app
+def main():
+    # Create a sidebar menu for navigation
+    menu = ["Input Form", "Submitted Data"]
+    choice = st.sidebar.selectbox("Select a page", menu)
+    
+    # Display the selected page
+    if choice == "Input Form":
+        input_form()
+    else:
+        display_table()
+
+if __name__ == '__main__':
+    main()
